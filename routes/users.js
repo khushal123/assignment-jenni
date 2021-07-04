@@ -1,25 +1,50 @@
 const express = require('express');
 const router = express.Router();
+const { body, validationResult } = require('express-validator');
+const { createAdmin, createWorker, login, list } = require('../controllers/user')
+const { errorResponse } = require('../utils/response')
 
-router.post('/signup-admin', function(req, res, next) {
-  res.send('respond with a resource');
+
+router.get('/', function (req, res) {
+  return list(req, res)
+})
+
+router.post('/signup-admin', [
+  body("name", "A valid name is required").exists(),
+  body("email", "A valid description is required").exists().isEmail(),
+  body("password", "A valid coupon_code is required").exists(),
+], function (req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return errorResponse(res, errors)
+  }
+  return createAdmin(req, res)
 });
 
-router.post('/signup-worker', function(req, res, next) {
-  res.send('respond with a resource');
+router.post('/signup-worker', [
+  body("name", "A valid name is required").exists(),
+  body("email", "A valid description is required").exists().isEmail(),
+  body("password", "A valid coupon_code is required").exists(),
+], function (req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return errorResponse(res, errors)
+  }
+  return createWorker(req, res)
 });
 
-router.post('/login', function(req, res, next) {
-  res.send('respond with a resource');
+router.post('/login', [
+  body("email", "A valid description is required").exists().isEmail(),
+  body("password", "A valid coupon_code is required").exists(),
+], function (req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return errorResponse(res, errors)
+  }
+  return login(req, res)
 });
 
-router.post('/jobs', function(req, res, next) {
-  res.send('respond with a resource');
-});
 
-router.get('/jobs', function(req, res, next) {
-  res.send('respond with a resource');
-});
 
 
 

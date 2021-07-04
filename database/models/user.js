@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { generateHash } = require("../../utils/hash")
 
 const schema = new mongoose.Schema(
   {
@@ -11,7 +12,7 @@ const schema = new mongoose.Schema(
     name: String,
     role: {
       type: String,
-      enum: ["Admin", "Worker"],
+      enum: ["admin", "worker"],
     },
   },
   {
@@ -28,4 +29,15 @@ const schema = new mongoose.Schema(
     },
   }
 );
+
+schema.pre("save", function (next) {
+  if (!this.isModified("password")) return next();
+
+  // const rounds = process.env === "test" ? 1 : 9;
+  generateHash(this.password).then((hash) => {
+    this.password = hash
+    next()
+  }).catch(next)
+});
+
 module.exports = mongoose.model("Users", schema);

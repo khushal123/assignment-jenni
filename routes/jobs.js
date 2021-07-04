@@ -1,14 +1,56 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const { errorResponse } = require('../utils/response')
+const { body, validationResult, param } = require("express-validator");
+const { errorResponse } = require("../utils/response");
+const { authenticate } = require("./../middleware/passport");
+const { create, update, list, getByUser } = require("../controllers/jobs");
+const passport = require("passport");
+require("./../middleware/passport");
+router.post(
+  "/",
+  [
+    body("worker", "A valid worker id is required").exists(),
+    body("task", "A valid task name is required").exists(),
+    body("status", "A valid status is required").exists(),
+  ],
+  passport.authenticate("jwt", { session: false }),
+  function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return errorResponse(res, errors);
+    }
+    return create(req, res);
+  }
+);
 
-router.post('/jobs', function (req, res) {
-  res.send('respond with a resource');
+router.get(
+  "/:worker",
+  [param("worker", "A valid worker id is required").exists()],
+  function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return errorResponse(res, errors);
+    }
+    return getByUser(req, res);
+  }
+);
+router.get("/", function (req, res) {
+  return list(req, res);
 });
 
-router.get('/jobs', function (req, res) {
-  res.send('respond with a resource');
-});
+router.patch(
+  "/:jobId",
+  [
+    param("jobId", "A valid jobId is required").exists(),
+    body("status", "A valid status is required").exists(),
+  ],
+  function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return errorResponse(res, errors);
+    }
+    return update(req, res);
+  }
+);
 
 module.exports = router;

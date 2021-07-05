@@ -3,15 +3,19 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { createAdmin, createWorker, login, list } = require('../controllers/user')
 const { errorResponse } = require('../utils/response')
+const { checkAdmin } = require("../middleware/auth")
+const passport = require("passport");
 
-
-router.get('/', function (req, res) {
-  return list(req, res)
-})
+router.get('/',
+  passport.authenticate("jwt", { session: false }),
+  checkAdmin,
+  function (req, res) {
+    return list(req, res)
+  })
 
 router.post('/signup-admin', [
   body("name", "A valid name is required").exists(),
-  body("email", "A valid description is required").exists().isEmail(),
+  body("email", "A valid email is required").exists().isEmail(),
   body("password", "A valid coupon_code is required").exists(),
 ], function (req, res) {
   const errors = validationResult(req);
@@ -23,7 +27,7 @@ router.post('/signup-admin', [
 
 router.post('/signup-worker', [
   body("name", "A valid name is required").exists(),
-  body("email", "A valid description is required").exists().isEmail(),
+  body("email", "A valid email is required").exists().isEmail(),
   body("password", "A valid coupon_code is required").exists(),
 ], function (req, res) {
   const errors = validationResult(req);
@@ -34,8 +38,8 @@ router.post('/signup-worker', [
 });
 
 router.post('/login', [
-  body("email", "A valid description is required").exists().isEmail(),
-  body("password", "A valid coupon_code is required").exists(),
+  body("email", "A valid email is required").exists().isEmail(),
+  body("password", "A valid password is required").exists(),
 ], function (req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

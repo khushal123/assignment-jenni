@@ -31,14 +31,14 @@ let generateToken = (id) => {
     const expiresIn = '1d';
 
     const payload = {
-        sub: id,
+        id: id,
         iat: Date.now()
     };
 
     const signedToken = jwt.sign(payload, secret, { expiresIn: expiresIn });
 
     return {
-        token: "Bearer " + signedToken,
+        token: signedToken,
         expires: expiresIn
     }
 };

@@ -2,10 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { body, validationResult, param } = require("express-validator");
 const { errorResponse } = require("../utils/response");
-const { authenticate } = require("./../middleware/passport");
 const { create, update, list, getByUser } = require("../controllers/jobs");
+const { checkAdmin } = require("../middleware/auth")
 const passport = require("passport");
-require("./../middleware/passport");
 router.post(
   "/",
   [
@@ -14,6 +13,7 @@ router.post(
     body("status", "A valid status is required").exists(),
   ],
   passport.authenticate("jwt", { session: false }),
+  checkAdmin,
   function (req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -24,8 +24,8 @@ router.post(
 );
 
 router.get(
-  "/:worker",
-  [param("worker", "A valid worker id is required").exists()],
+  "/",
+  passport.authenticate("jwt", { session: false }),
   function (req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -34,7 +34,7 @@ router.get(
     return getByUser(req, res);
   }
 );
-router.get("/", function (req, res) {
+router.get("/", passport.authenticate("jwt", { session: false }), function (req, res) {
   return list(req, res);
 });
 
@@ -44,6 +44,7 @@ router.patch(
     param("jobId", "A valid jobId is required").exists(),
     body("status", "A valid status is required").exists(),
   ],
+  passport.authenticate("jwt", { session: false }),
   function (req, res) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

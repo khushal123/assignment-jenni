@@ -12,7 +12,8 @@ const create = async (req, res) => {
 
 const getByUser = async (req, res) => {
   try {
-    const job = await jobService.getByUser(req.params.worker);
+    const id = req.user._id;
+    const job = await jobService.getByUser(id);
     return successResponse(res, job, 200);
   } catch (error) {
     return errorResponse(res, error, 400);
@@ -30,10 +31,10 @@ const list = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const job = await jobService.update(req.body, req.params.jobId);
+    const userId = req.user._id
+    const job = await jobService.update(req.body, req.params.jobId, userId);
     return successResponse(res, job, 200);
   } catch (error) {
-    console.log(error);
     return errorResponse(res, error, 400);
   }
 };

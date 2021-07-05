@@ -3,6 +3,9 @@ const userService = require("./userService");
 const create = async (body) => {
   try {
     const user = await userService.getById(body.worker);
+    if(!user){
+      throw "Invalid worker id";
+    }
     if (user && user.role === "admin") {
       throw "User should be a worker";
     }
@@ -17,7 +20,11 @@ const create = async (body) => {
 const getByUser = async (id) => {
   try {
     const jobs = await Jobs.find({ worker: id }).populate("worker");
-    return jobs;
+    console.log(jobs)
+    if(jobs.length === 0){
+      throw "no jobs found"
+    }
+    return jobs
   } catch (error) {
     console.error(error);
     throw error;
@@ -34,11 +41,12 @@ const list = async () => {
   }
 };
 
-const update = async (body, id) => {
+const update = async (body, id, userId) => {
   try {
     const job = await Jobs.findOneAndUpdate(
       {
         _id: id,
+        worker:userId
       },
       {
         $set: body,
@@ -47,7 +55,7 @@ const update = async (body, id) => {
       }
     );
     if(!job){
-      throw "Invalid job id"
+      throw "job not found"
     }
     return job;
   } catch (error) {
